@@ -11,17 +11,25 @@ video = cv2.VideoCapture(0)
 while True:
     check, frame = video.read()
     status = 0
+
+    #converts image to gray
     gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+    #smooths image
     gray = cv2.GaussianBlur(gray,(21,21),0)
 
+    # saves first frame to use it as a comparison for subsequent frames
     if first_frame is None:
         first_frame = gray
         continue
 
+    # create a difference frame
     delta_frame = cv2.absdiff(first_frame,gray)
+    # applies thresholding on the difference frame
     threshold_frame = cv2.threshold(delta_frame,30,255,cv2.THRESH_BINARY)[1]
+    # dilates image
     threshold_frame = cv2.dilate(threshold_frame,None,iterations = 2)
 
+    # getting a 'box' using contours which joins continuous points of same intensity
     (cnts,_) = cv2.findContours(threshold_frame.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in cnts:
